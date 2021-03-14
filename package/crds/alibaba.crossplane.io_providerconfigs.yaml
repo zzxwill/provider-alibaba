@@ -72,11 +72,15 @@ spec:
                 required:
                 - source
                 type: object
+              profile:
+                description: Profile is used to extend fields of ProviderConfigSpec. Currently only map type is supported
+                type: object
               region:
                 description: Region for managed resources created using this Alibaba Cloud provider, e.g. "cn-hangzhou".
                 type: string
             required:
             - credentials
+            - profile
             - region
             type: object
           status:

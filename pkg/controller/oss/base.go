@@ -19,12 +19,14 @@
 package oss
 
 import (
+	"errors"
+
 	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 	"github.com/crossplane/crossplane-runtime/pkg/event"
 	"github.com/crossplane/crossplane-runtime/pkg/logging"
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
-	"github.com/pkg/errors"
+	"k8s.io/klog/v2"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/crossplane/provider-alibaba/apis/oss/v1alpha1"
@@ -32,12 +34,15 @@ import (
 )
 
 // BaseObserve is the common logic for controller Observe reconciling
-func BaseObserve(mg resource.Managed, c ossclient.SDKClient) (managed.ExternalObservation, error) {
+func BaseObserve(mg resource.Managed, c ossclient.ClientInterface) (managed.ExternalObservation, error) {
 	cr, ok := mg.(*v1alpha1.OSS)
 	if !ok {
 		return managed.ExternalObservation{}, errors.New(errNotOSS)
 	}
-	bucket, err := c.Describe(cr.Spec.ForProvider.Bucket.Name)
+	bucketName := cr.Spec.ForProvider.Bucket.Name
+	klog.InfoS("observing OSS resource", "Name", bucketName)
+
+	bucket, err := c.Describe(bucketName)
 	if ossclient.IsNotFoundError(err) {
 		return managed.ExternalObservation{
 			ResourceExists: false,
@@ -50,7 +55,8 @@ func BaseObserve(mg resource.Managed, c ossclient.SDKClient) (managed.ExternalOb
 
 	cr.Status.AtProvider = ossclient.GenerateObservation(*bucket)
 	var upToDate bool
-	if cr.Spec.ForProvider.Bucket.ACL == bucket.BucketInfo.ACL {
+	if (cr.Spec.ForProvider.Bucket.ACL == bucket.BucketInfo.ACL) ||
+		(cr.Spec.ForProvider.Bucket.ACL == "" && bucket.BucketInfo.ACL == "private") {
 		upToDate = true
 		cr.SetConditions(xpv1.Available())
 	}
@@ -63,11 +69,12 @@ func BaseObserve(mg resource.Managed, c ossclient.SDKClient) (managed.ExternalOb
 }
 
 // BaseCreate is the logic for Create reconciling
-func BaseCreate(mg resource.Managed, c ossclient.SDKClient) (managed.ExternalCreation, error) {
+func BaseCreate(mg resource.Managed, c ossclient.ClientInterface) (managed.ExternalCreation, error) {
 	cr, ok := mg.(*v1alpha1.OSS)
 	if !ok {
 		return managed.ExternalCreation{}, errors.New(errNotOSS)
 	}
+	klog.InfoS("creating OSS resource", "Name", cr.Spec.ForProvider.Bucket.Name)
 	cr.SetConditions(xpv1.Creating())
 	if err := c.Create(cr.Spec.ForProvider.Bucket); err != nil {
 		return managed.ExternalCreation{}, err
@@ -76,11 +83,12 @@ func BaseCreate(mg resource.Managed, c ossclient.SDKClient) (managed.ExternalCre
 }
 
 // BaseUpdate is the base logic for controller Update reconciling
-func BaseUpdate(mg resource.Managed, client ossclient.SDKClient) (managed.ExternalUpdate, error) {
+func BaseUpdate(mg resource.Managed, client ossclient.ClientInterface) (managed.ExternalUpdate, error) {
 	cr, ok := mg.(*v1alpha1.OSS)
 	if !ok {
 		return managed.ExternalUpdate{}, errors.New(errNotOSS)
 	}
+	klog.InfoS("updating OSS resource", "Name", cr.Spec.ForProvider.Bucket.Name)
 	cr.Status.SetConditions(xpv1.Creating())
 	got, err := client.Describe(cr.Spec.ForProvider.Bucket.Name)
 	if err != nil {
@@ -104,11 +112,12 @@ func BaseUpdate(mg resource.Managed, client ossclient.SDKClient) (managed.Extern
 }
 
 // BaseDelete is the common logic for controller Delete reconciling
-func BaseDelete(mg resource.Managed, client ossclient.SDKClient) error {
+func BaseDelete(mg resource.Managed, client ossclient.ClientInterface) error {
 	cr, ok := mg.(*v1alpha1.OSS)
 	if !ok {
 		return errors.New(errNotOSS)
 	}
+	klog.InfoS("deleting OSS resource", "Name", cr.Spec.ForProvider.Bucket.Name)
 	cr.SetConditions(xpv1.Deleting())
 	if err := client.Delete(cr.Spec.ForProvider.Bucket.Name); err != nil && !ossclient.IsNotFoundError(err) {
 		return err

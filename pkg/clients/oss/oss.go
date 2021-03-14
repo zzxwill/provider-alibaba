@@ -28,6 +28,14 @@ import (
 	"github.com/crossplane/provider-alibaba/apis/oss/v1alpha1"
 )
 
+// ClientInterface will help fakeOSSClient in unit tests
+type ClientInterface interface {
+	Describe(name string) (*sdk.GetBucketInfoResult, error)
+	Create(bucket v1alpha1.Bucket) error
+	Update(name string, aclStr string) error
+	Delete(name string) error
+}
+
 // SDKClient is the SDK client for OSS
 type SDKClient struct {
 	Client *sdk.Client
@@ -64,7 +72,7 @@ func (c *SDKClient) Create(bucket v1alpha1.Bucket) error {
 	)
 
 	// validate ACL
-	acl, err = validateOSSAcl(bucket.ACL)
+	acl, err = ValidateOSSAcl(bucket.ACL)
 	if err != nil {
 		return err
 	}
@@ -95,7 +103,7 @@ func (c *SDKClient) Create(bucket v1alpha1.Bucket) error {
 
 // Update sets bucket acl
 func (c *SDKClient) Update(name string, aclStr string) error {
-	acl, err := validateOSSAcl(aclStr)
+	acl, err := ValidateOSSAcl(aclStr)
 	if err != nil {
 		klog.ErrorS(err, "Name", name, "ACL", aclStr)
 		return err
@@ -130,7 +138,8 @@ func GenerateObservation(r sdk.GetBucketInfoResult) v1alpha1.OSSObservation {
 	}
 }
 
-func validateOSSAcl(aclStr string) (sdk.ACLType, error) {
+// ValidateOSSAcl validates OSS ACL and convert it to sdk.ACLType if possible
+func ValidateOSSAcl(aclStr string) (sdk.ACLType, error) {
 	var acl sdk.ACLType
 	switch aclStr {
 	case string(sdk.ACLPublicRead):

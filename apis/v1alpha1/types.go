@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 
 	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
@@ -61,6 +62,9 @@ type ProviderConfigSpec struct {
 	// Region for managed resources created using this Alibaba Cloud provider,
 	// e.g. "cn-hangzhou".
 	Region string `json:"region"`
+
+	// Profile is used to extend fields of ProviderConfigSpec. Currently only map type is supported
+	Profile *runtime.RawExtension `json:"profile"`
 }
 
 // A ProviderConfigStatus represents the status of a ProviderConfig.

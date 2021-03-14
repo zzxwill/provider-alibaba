@@ -21,8 +21,6 @@ package v1alpha1
 import (
 	runtimev1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	"github.com/crossplane/provider-alibaba/apis/v1alpha1"
 )
 
 // +kubebuilder:object:root=true
@@ -71,8 +69,7 @@ type Bucket struct {
 
 // OSSParameters define the desired state of an OSS
 type OSSParameters struct {
-	Bucket  Bucket           `json:"bucket,omitempty"`
-	Profile v1alpha1.Profile `json:"profile,omitempty"`
+	Bucket Bucket `json:"bucket,omitempty"`
 }
 
 // OSSObservation is the representation of the current state that is observed.

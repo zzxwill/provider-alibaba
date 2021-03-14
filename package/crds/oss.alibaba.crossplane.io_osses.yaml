@@ -64,25 +64,6 @@ spec:
                     required:
                     - name
                     type: object
-                  profile:
-                    description: Profile is common required information to extend provider-alibaba
-                    properties:
-                      envType:
-                        description: EnvType TODO(zzxwill) needs further confirmation
-                        type: string
-                      resourceGroup:
-                        description: ResoureGroup is resource group
-                        type: string
-                      serviceAccount:
-                        description: ServiceAccount is service account name
-                        type: string
-                      versionID:
-                        description: VersionID TODO(zzxwill) needs further confirmation
-                        type: integer
-                      zoneID:
-                        description: ZoneID is Zone ID of a region
-                        type: string
-                    type: object
                 type: object
               providerConfigRef:
                 description: ProviderConfigReference specifies how the provider that will be used to create, observe, update, and delete this managed resource should be configured.

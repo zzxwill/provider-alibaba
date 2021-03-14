@@ -20,7 +20,6 @@ package oss
 
 import (
 	"context"
-	"fmt"
 
 	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 	"github.com/crossplane/crossplane-runtime/pkg/logging"
@@ -35,13 +34,13 @@ import (
 	"github.com/crossplane/provider-alibaba/apis/oss/v1alpha1"
 	aliv1alpha1 "github.com/crossplane/provider-alibaba/apis/v1alpha1"
 	ossclient "github.com/crossplane/provider-alibaba/pkg/clients/oss"
+	"github.com/crossplane/provider-alibaba/pkg/util"
 )
 
 const (
 	errNotOSS                   = "managed resource is not an OSS custom resource"
 	errCreateBucket             = "cannot create OSS bucket"
 	errNoProvider               = "no provider config or provider specified"
-	errGetProviderConfig        = "cannot get provider config"
 	errTrackUsage               = "cannot track provider config usage"
 	errNoConnectionSecret       = "no connection secret specified"
 	errGetConnectionSecret      = "cannot get connection secret"
@@ -84,15 +83,16 @@ func (c *Connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 			return nil, errors.Wrap(err, errTrackUsage)
 		}
 
-		pc := &aliv1alpha1.ProviderConfig{}
-		if err := c.Client.Get(ctx, types.NamespacedName{Name: cr.Spec.ProviderConfigReference.Name}, pc); err != nil {
-			return nil, errors.Wrap(err, errGetProviderConfig)
+		providerConfig, err := util.GetProviderConfig(ctx, c.Client, cr.Spec.ProviderConfigReference.Name)
+		if err != nil {
+			return nil, err
 		}
-		if s := pc.Spec.Credentials.Source; s != xpv1.CredentialsSourceSecret {
+
+		if s := providerConfig.Spec.Credentials.Source; s != xpv1.CredentialsSourceSecret {
 			return nil, errors.Errorf(errFmtUnsupportedCredSource, s)
 		}
-		secretKeySelector = pc.Spec.Credentials.SecretRef
-		region = pc.Spec.Region
+		secretKeySelector = providerConfig.Spec.Credentials.SecretRef
+		region = providerConfig.Spec.Region
 	default:
 		return nil, errors.New(errNoProvider)
 	}
@@ -100,21 +100,23 @@ func (c *Connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 	if secretKeySelector == nil {
 		return nil, errors.New(errNoConnectionSecret)
 	}
-
 	s := &corev1.Secret{}
 	nn := types.NamespacedName{Namespace: secretKeySelector.Namespace, Name: secretKeySelector.Name}
 	if err := c.Client.Get(ctx, nn, s); err != nil {
 		return nil, errors.Wrap(err, errGetConnectionSecret)
 	}
 
-	endpoint := fmt.Sprintf("http://oss-%s.aliyuncs.com", region)
+	endpoint, err := util.GetEndpoint(cr.DeepCopyObject(), region)
+	if err != nil {
+		return nil, err
+	}
 
 	ossClient, err := c.NewClientFn(ctx, endpoint, string(s.Data["accessKeyId"]), string(s.Data["accessKeySecret"]))
-	return &external{client: *ossClient}, errors.Wrap(err, errCreateBucket)
+	return &external{client: ossClient}, errors.Wrap(err, errCreateBucket)
 }
 
 type external struct {
-	client ossclient.SDKClient
+	client ossclient.ClientInterface
 }
 
 func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.ExternalObservation, error) {
