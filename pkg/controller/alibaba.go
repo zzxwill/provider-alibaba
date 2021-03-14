@@ -17,20 +17,20 @@ limitations under the License.
 package controller
 
 import (
+	"github.com/crossplane/crossplane-runtime/pkg/logging"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/crossplane/provider-alibaba/pkg/controller/config"
 	"github.com/crossplane/provider-alibaba/pkg/controller/database"
-
-	"github.com/crossplane/crossplane-runtime/pkg/logging"
+	"github.com/crossplane/provider-alibaba/pkg/controller/oss"
 )
 
-// Setup creates all Alibaba controllers with the supplied logger and adds them
-// to the supplied manager.
+// Setup creates Alibaba controllers with the supplied logger and adds them to the supplied manager.
 func Setup(mgr ctrl.Manager, l logging.Logger) error {
 	for _, setup := range []func(ctrl.Manager, logging.Logger) error{
 		config.Setup,
 		database.SetupRDSInstance,
+		oss.SetupOSS,
 	} {
 		if err := setup(mgr, l); err != nil {
 			return err
