@@ -21,6 +21,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 
 	databasev1alpha1 "github.com/crossplane/provider-alibaba/apis/database/v1alpha1"
+	ossv1alpha1 "github.com/crossplane/provider-alibaba/apis/oss/v1alpha1"
 	"github.com/crossplane/provider-alibaba/apis/v1alpha1"
 )
 
@@ -29,7 +30,7 @@ func init() {
 	AddToSchemes = append(AddToSchemes,
 		v1alpha1.SchemeBuilder.AddToScheme,
 		databasev1alpha1.SchemeBuilder.AddToScheme,
-	)
+		ossv1alpha1.SchemeBuilder.AddToScheme)
 }
 
 // AddToSchemes may be used to add all resources defined in the project to a Scheme
