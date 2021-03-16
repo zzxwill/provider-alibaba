@@ -25,6 +25,9 @@ spec:
     - jsonPath: .status.conditions[?(@.type=='Synced')].status
       name: SYNCED
       type: string
+    - jsonPath: .status.atProvider.message
+      name: WARNING
+      type: string
     name: v1alpha1
     schema:
       openAPIV3Schema:

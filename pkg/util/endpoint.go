@@ -38,7 +38,7 @@ var (
 
 // GetEndpoint gets endpoints for all cloud resources
 func GetEndpoint(res runtime.Object, region string) (string, error) {
-	klog.InfoS("getting endpoint for resource", "CloudResource", res)
+	klog.Info("getting endpoint for resource")
 	if region == "" {
 		klog.Error(errRegionNotValid)
 		return "", errors.New(errRegionNotValid)

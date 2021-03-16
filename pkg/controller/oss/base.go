@@ -39,10 +39,10 @@ func BaseObserve(mg resource.Managed, c ossclient.ClientInterface) (managed.Exte
 	if !ok {
 		return managed.ExternalObservation{}, errors.New(errNotOSS)
 	}
-	bucketName := cr.Spec.ForProvider.Bucket.Name
-	klog.InfoS("observing OSS resource", "Name", bucketName)
+	bucketSpec := cr.Spec.ForProvider.Bucket
+	klog.InfoS("observing OSS resource", "Name", bucketSpec.Name)
 
-	bucket, err := c.Describe(bucketName)
+	bucket, err := c.Describe(bucketSpec.Name)
 	if ossclient.IsNotFoundError(err) {
 		return managed.ExternalObservation{
 			ResourceExists: false,
@@ -54,10 +54,14 @@ func BaseObserve(mg resource.Managed, c ossclient.ClientInterface) (managed.Exte
 	}
 
 	cr.Status.AtProvider = ossclient.GenerateObservation(*bucket)
-	var upToDate bool
-	if (cr.Spec.ForProvider.Bucket.ACL == bucket.BucketInfo.ACL) ||
-		(cr.Spec.ForProvider.Bucket.ACL == "" && bucket.BucketInfo.ACL == "private") {
-		upToDate = true
+	if bucketSpec.StorageClass != "" && bucketSpec.StorageClass != bucket.BucketInfo.StorageClass {
+		cr.Status.AtProvider.Message += "[Warning] StorageClass is not allowed to update after creation; "
+	}
+	if bucketSpec.DataRedundancyType != "" && bucketSpec.DataRedundancyType != bucket.BucketInfo.RedundancyType {
+		cr.Status.AtProvider.Message += "[Warning] DataRedundancyType is not allowed to update after creation; "
+	}
+	var upToDate = ossclient.IsUpdateToDate(cr, bucket)
+	if upToDate {
 		cr.SetConditions(xpv1.Available())
 	}
 
@@ -96,14 +100,9 @@ func BaseUpdate(mg resource.Managed, client ossclient.ClientInterface) (managed.
 	}
 
 	target := cr.Spec.ForProvider.Bucket
-	if target.StorageClass != "" && target.StorageClass != got.BucketInfo.StorageClass {
-		cr.Status.AtProvider.Message = "[Warning] StorageClass is not allowed to update after creation"
-	}
-	if target.DataRedundancyType != "" && target.DataRedundancyType != got.BucketInfo.RedundancyType {
-		cr.Status.AtProvider.Message = "[Warning] DataRedundancyType is not allowed to update after creation"
-	}
+
 	if target.ACL != "" && target.ACL != got.BucketInfo.ACL {
-		if err := client.Update(cr.Name, target.ACL); err != nil {
+		if err := client.Update(target.Name, target.ACL); err != nil {
 			return managed.ExternalUpdate{}, err
 		}
 	}

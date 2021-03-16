@@ -146,9 +146,7 @@ func ValidateOSSAcl(aclStr string) (sdk.ACLType, error) {
 		acl = sdk.ACLPublicRead
 	case string(sdk.ACLPublicReadWrite):
 		acl = sdk.ACLPublicReadWrite
-	case string(sdk.ACLPrivate):
-		acl = sdk.ACLPrivate
-	case "":
+	case string(sdk.ACLPrivate), "":
 		acl = sdk.ACLPrivate
 	default:
 		err := fmt.Errorf("bucket ACL %s is invalid. The ACL could only be public-read-write, public-read, and private", aclStr)
@@ -161,7 +159,7 @@ func ValidateOSSAcl(aclStr string) (sdk.ACLType, error) {
 func validateOSSStorageClass(storageClassStr string) (sdk.StorageClassType, error) {
 	var storageClass sdk.StorageClassType
 	switch storageClassStr {
-	case string(sdk.StorageStandard):
+	case string(sdk.StorageStandard), "":
 		storageClass = sdk.StorageStandard
 	case string(sdk.StorageIA):
 		storageClass = sdk.StorageIA
@@ -169,8 +167,6 @@ func validateOSSStorageClass(storageClassStr string) (sdk.StorageClassType, erro
 		storageClass = sdk.StorageArchive
 	case string(sdk.StorageColdArchive):
 		storageClass = sdk.StorageColdArchive
-	case "":
-		storageClass = sdk.StorageStandard
 	default:
 		err := fmt.Errorf("bucket StorageClass %s is invalid. It only supports could be Standard, IA, Archive, and ColdArchive", storageClassStr)
 		return "", err
@@ -181,15 +177,21 @@ func validateOSSStorageClass(storageClassStr string) (sdk.StorageClassType, erro
 func validateOSSDataRedundancyType(dataRedundancyTypeStr string) (sdk.DataRedundancyType, error) {
 	var dataRedundancyType sdk.DataRedundancyType
 	switch dataRedundancyTypeStr {
-	case string(sdk.RedundancyLRS):
+	case string(sdk.RedundancyLRS), "":
 		dataRedundancyType = sdk.RedundancyLRS
 	case string(sdk.RedundancyZRS):
 		dataRedundancyType = sdk.RedundancyZRS
-	case "":
-		dataRedundancyType = sdk.RedundancyLRS
 	default:
-		err := fmt.Errorf("bucket DataRedundancyType %s is invalid. It only supports could be LRS and ZRS", dataRedundancyType)
-		return "", err
+		return "", fmt.Errorf("bucket DataRedundancyType %s is invalid. It only supports could be LRS and ZRS", dataRedundancyType)
 	}
 	return dataRedundancyType, nil
+}
+
+// IsUpdateToDate checks whether cr is up to date
+func IsUpdateToDate(cr *v1alpha1.OSS, bucket *sdk.GetBucketInfoResult) bool {
+	bucketSpec := cr.Spec.ForProvider.Bucket
+	if (bucketSpec.ACL == bucket.BucketInfo.ACL) || (bucketSpec.ACL == "" && bucket.BucketInfo.ACL == "private") {
+		return true
+	}
+	return false
 }

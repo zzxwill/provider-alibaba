@@ -37,6 +37,7 @@ type OSSList struct {
 // OSS is a managed resource that represents an OSS instance
 // +kubebuilder:printcolumn:name="READY",type="string",JSONPath=".status.conditions[?(@.type=='Ready')].status"
 // +kubebuilder:printcolumn:name="SYNCED",type="string",JSONPath=".status.conditions[?(@.type=='Synced')].status"
+// +kubebuilder:printcolumn:name="WARNING",type="string",JSONPath=".status.atProvider.message"
 // +kubebuilder:subresource:status
 // +kubebuilder:resource:scope=Cluster,categories={crossplane,managed,alibaba}
 type OSS struct {
