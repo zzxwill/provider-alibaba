@@ -68,7 +68,7 @@ func BaseObserve(mg resource.Managed, c ossclient.ClientInterface) (managed.Exte
 	return managed.ExternalObservation{
 		ResourceExists:    true,
 		ResourceUpToDate:  upToDate,
-		ConnectionDetails: getConnectionDetails(cr),
+		ConnectionDetails: GetConnectionDetails(cr),
 	}, nil
 }
 
@@ -83,7 +83,7 @@ func BaseCreate(mg resource.Managed, c ossclient.ClientInterface) (managed.Exter
 	if err := c.Create(cr.Spec.ForProvider.Bucket); err != nil {
 		return managed.ExternalCreation{}, err
 	}
-	return managed.ExternalCreation{ConnectionDetails: getConnectionDetails(cr)}, nil
+	return managed.ExternalCreation{ConnectionDetails: GetConnectionDetails(cr)}, nil
 }
 
 // BaseUpdate is the base logic for controller Update reconciling
@@ -139,7 +139,8 @@ func BaseSetupOSS(mgr ctrl.Manager, l logging.Logger, o ...managed.ReconcilerOpt
 			resource.ManagedKind(v1alpha1.OSSGroupVersionKind), o...))
 }
 
-func getConnectionDetails(cr *v1alpha1.OSS) managed.ConnectionDetails {
+// GetConnectionDetails generates connection details
+func GetConnectionDetails(cr *v1alpha1.OSS) managed.ConnectionDetails {
 	cd := managed.ConnectionDetails{
 		"Bucket": []byte(cr.Spec.ForProvider.Bucket.Name),
 	}
