@@ -17,10 +17,8 @@ limitations under the License.
 package v1alpha1
 
 import (
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
-
 	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // A ProviderSpec defines the desired state of a Provider.
@@ -63,8 +61,9 @@ type ProviderConfigSpec struct {
 	// e.g. "cn-hangzhou".
 	Region string `json:"region"`
 
-	// Profile is used to extend fields of ProviderConfigSpec. Currently only map type is supported
-	Profile *runtime.RawExtension `json:"profile"`
+	// Profile is used to extend fields of ProviderConfigSpec.
+	// +kubebuilder:pruning:PreserveUnknownFields
+	Profile map[string]string `json:"profile,omitempty"`
 }
 
 // A ProviderConfigStatus represents the status of a ProviderConfig.
