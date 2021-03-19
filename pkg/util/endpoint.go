@@ -55,7 +55,6 @@ func GetEndpoint(res runtime.Object, region string) (string, error) {
 	case ossapi.OSSKind:
 		endpoint = fmt.Sprintf("http://oss-%s.%s", region, Domain)
 	default:
-		klog.ErrorS(err, "ResourceObject", res)
 		return "", err
 	}
 	return endpoint, nil

@@ -39,7 +39,7 @@ var (
 
 var (
 	// OSSKind is
-	OSSKind = reflect.TypeOf(OSS{}).Name()
+	OSSKind = reflect.TypeOf(Bucket{}).Name()
 	// OSSGroupKind is
 	OSSGroupKind = schema.GroupKind{Group: GroupVersion.Group, Kind: OSSKind}.String()
 	// OSSKindAPIVersion is
@@ -49,5 +49,5 @@ var (
 )
 
 func init() {
-	SchemeBuilder.Register(&OSS{}, &OSSList{})
+	SchemeBuilder.Register(&Bucket{}, &BucketList{})
 }

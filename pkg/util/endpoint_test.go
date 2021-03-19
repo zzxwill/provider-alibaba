@@ -37,7 +37,7 @@ func TestGetEndpoint(t *testing.T) {
 		err      error
 	}
 	region := "cn-beijing"
-	cr := v1alpha1.OSS{TypeMeta: metav1.TypeMeta{Kind: "OSS"}}
+	cr := v1alpha1.Bucket{TypeMeta: metav1.TypeMeta{Kind: "Bucket"}}
 
 	cases := map[string]struct {
 		res    runtime.Object

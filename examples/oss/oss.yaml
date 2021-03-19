@@ -1,5 +1,5 @@
 apiVersion: oss.alibaba.crossplane.io/v1alpha1
-kind: OSS
+kind: Bucket
 metadata:
   name: example-oss
 spec:

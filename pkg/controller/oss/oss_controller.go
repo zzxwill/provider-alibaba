@@ -38,8 +38,8 @@ import (
 )
 
 const (
-	errNotOSS                   = "managed resource is not an OSS custom resource"
-	errCreateBucket             = "cannot create OSS bucket"
+	errNotOSS                   = "managed resource is not an Bucket custom resource"
+	errCreateBucket             = "cannot create Bucket bucket"
 	errNoProvider               = "no provider config or provider specified"
 	errTrackUsage               = "cannot track provider config usage"
 	errNoConnectionSecret       = "no connection secret specified"
@@ -47,8 +47,8 @@ const (
 	errFmtUnsupportedCredSource = "credentials source %q is not currently supported"
 )
 
-// SetupOSS adds a controller that reconciles OSS.
-func SetupOSS(mgr ctrl.Manager, l logging.Logger) error {
+// SetupBucket adds a controller that reconciles Bucket.
+func SetupBucket(mgr ctrl.Manager, l logging.Logger) error {
 	options := []managed.ReconcilerOption{managed.WithExternalConnecter(&Connector{
 		Client:      mgr.GetClient(),
 		Usage:       resource.NewProviderConfigUsageTracker(mgr.GetClient(), &aliv1alpha1.ProviderConfigUsage{}),
@@ -67,7 +67,7 @@ type Connector struct {
 
 // Connect initials cloud resource client
 func (c *Connector) Connect(ctx context.Context, mg resource.Managed) (managed.ExternalClient, error) {
-	cr, ok := mg.(*v1alpha1.OSS)
+	cr, ok := mg.(*v1alpha1.Bucket)
 	if !ok {
 		return nil, errors.New(errNotOSS)
 	}

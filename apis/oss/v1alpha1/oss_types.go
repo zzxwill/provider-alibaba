@@ -25,52 +25,52 @@ import (
 
 // +kubebuilder:object:root=true
 
-// OSSList contains a list of OSS
-type OSSList struct {
+// BucketList contains a list of Bucket
+type BucketList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []OSS `json:"items"`
+	Items           []Bucket `json:"items"`
 }
 
 // +kubebuilder:object:root=true
 
-// OSS is a managed resource that represents an OSS instance
+// Bucket is a managed resource that represents an Bucket instance
 // +kubebuilder:printcolumn:name="READY",type="string",JSONPath=".status.conditions[?(@.type=='Ready')].status"
 // +kubebuilder:printcolumn:name="SYNCED",type="string",JSONPath=".status.conditions[?(@.type=='Synced')].status"
 // +kubebuilder:printcolumn:name="WARNING",type="string",JSONPath=".status.atProvider.message"
 // +kubebuilder:subresource:status
 // +kubebuilder:resource:scope=Cluster,categories={crossplane,managed,alibaba}
-type OSS struct {
+type Bucket struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   OSSSpec   `json:"spec,omitempty"`
-	Status OSSStatus `json:"status,omitempty"`
+	Spec   BucketSpec   `json:"spec,omitempty"`
+	Status BucketStatus `json:"status,omitempty"`
 }
 
-// OSSSpec defines the desired state of OSS
-type OSSSpec struct {
+// BucketSpec defines the desired state of Bucket
+type BucketSpec struct {
 	runtimev1.ResourceSpec `json:",inline"`
 	ForProvider            OSSParameters `json:"forProvider"`
 }
 
-// OSSStatus defines the observed state of OSS
-type OSSStatus struct {
+// BucketStatus defines the observed state of Bucket
+type BucketStatus struct {
 	runtimev1.ResourceStatus `json:",inline"`
 	AtProvider               OSSObservation `json:"atProvider,omitempty"`
 }
 
-// Bucket is the isolated place to store files
-type Bucket struct {
+// BucketParameter is the isolated place to store files
+type BucketParameter struct {
 	Name               string `json:"name"`
 	ACL                string `json:"acl,omitempty"`
 	StorageClass       string `json:"storageClass,omitempty"`
 	DataRedundancyType string `json:"dataRedundancyType,omitempty"`
 }
 
-// OSSParameters define the desired state of an OSS
+// OSSParameters define the desired state of an Bucket
 type OSSParameters struct {
-	Bucket Bucket `json:"bucket,omitempty"`
+	Bucket BucketParameter `json:"bucket,omitempty"`
 }
 
 // OSSObservation is the representation of the current state that is observed.

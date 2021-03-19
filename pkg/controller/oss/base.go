@@ -35,12 +35,12 @@ import (
 
 // BaseObserve is the common logic for controller Observe reconciling
 func BaseObserve(mg resource.Managed, c ossclient.ClientInterface) (managed.ExternalObservation, error) {
-	cr, ok := mg.(*v1alpha1.OSS)
+	cr, ok := mg.(*v1alpha1.Bucket)
 	if !ok {
 		return managed.ExternalObservation{}, errors.New(errNotOSS)
 	}
 	bucketSpec := cr.Spec.ForProvider.Bucket
-	klog.InfoS("observing OSS resource", "Name", bucketSpec.Name)
+	klog.InfoS("observing Bucket resource", "Name", bucketSpec.Name)
 
 	bucket, err := c.Describe(bucketSpec.Name)
 	if ossclient.IsNotFoundError(err) {
@@ -74,11 +74,11 @@ func BaseObserve(mg resource.Managed, c ossclient.ClientInterface) (managed.Exte
 
 // BaseCreate is the logic for Create reconciling
 func BaseCreate(mg resource.Managed, c ossclient.ClientInterface) (managed.ExternalCreation, error) {
-	cr, ok := mg.(*v1alpha1.OSS)
+	cr, ok := mg.(*v1alpha1.Bucket)
 	if !ok {
 		return managed.ExternalCreation{}, errors.New(errNotOSS)
 	}
-	klog.InfoS("creating OSS resource", "Name", cr.Spec.ForProvider.Bucket.Name)
+	klog.InfoS("creating Bucket resource", "Name", cr.Spec.ForProvider.Bucket.Name)
 	cr.SetConditions(xpv1.Creating())
 	if err := c.Create(cr.Spec.ForProvider.Bucket); err != nil {
 		return managed.ExternalCreation{}, err
@@ -88,11 +88,11 @@ func BaseCreate(mg resource.Managed, c ossclient.ClientInterface) (managed.Exter
 
 // BaseUpdate is the base logic for controller Update reconciling
 func BaseUpdate(mg resource.Managed, client ossclient.ClientInterface) (managed.ExternalUpdate, error) {
-	cr, ok := mg.(*v1alpha1.OSS)
+	cr, ok := mg.(*v1alpha1.Bucket)
 	if !ok {
 		return managed.ExternalUpdate{}, errors.New(errNotOSS)
 	}
-	klog.InfoS("updating OSS resource", "Name", cr.Spec.ForProvider.Bucket.Name)
+	klog.InfoS("updating Bucket resource", "Name", cr.Spec.ForProvider.Bucket.Name)
 	cr.Status.SetConditions(xpv1.Creating())
 	got, err := client.Describe(cr.Spec.ForProvider.Bucket.Name)
 	if err != nil {
@@ -112,11 +112,11 @@ func BaseUpdate(mg resource.Managed, client ossclient.ClientInterface) (managed.
 
 // BaseDelete is the common logic for controller Delete reconciling
 func BaseDelete(mg resource.Managed, client ossclient.ClientInterface) error {
-	cr, ok := mg.(*v1alpha1.OSS)
+	cr, ok := mg.(*v1alpha1.Bucket)
 	if !ok {
 		return errors.New(errNotOSS)
 	}
-	klog.InfoS("deleting OSS resource", "Name", cr.Spec.ForProvider.Bucket.Name)
+	klog.InfoS("deleting Bucket resource", "Name", cr.Spec.ForProvider.Bucket.Name)
 	cr.SetConditions(xpv1.Deleting())
 	if err := client.Delete(cr.Spec.ForProvider.Bucket.Name); err != nil && !ossclient.IsNotFoundError(err) {
 		return err
@@ -124,7 +124,7 @@ func BaseDelete(mg resource.Managed, client ossclient.ClientInterface) error {
 	return nil
 }
 
-// BaseSetupOSS is the base logic for controller SetupOSS
+// BaseSetupOSS is the base logic for controller SetupBucket
 func BaseSetupOSS(mgr ctrl.Manager, l logging.Logger, o ...managed.ReconcilerOption) error {
 	name := managed.ControllerName(v1alpha1.OSSGroupKind)
 	o = append(
@@ -134,13 +134,13 @@ func BaseSetupOSS(mgr ctrl.Manager, l logging.Logger, o ...managed.ReconcilerOpt
 	)
 	return ctrl.NewControllerManagedBy(mgr).
 		Named(name).
-		For(&v1alpha1.OSS{}).
+		For(&v1alpha1.Bucket{}).
 		Complete(managed.NewReconciler(mgr,
 			resource.ManagedKind(v1alpha1.OSSGroupVersionKind), o...))
 }
 
 // GetConnectionDetails generates connection details
-func GetConnectionDetails(cr *v1alpha1.OSS) managed.ConnectionDetails {
+func GetConnectionDetails(cr *v1alpha1.Bucket) managed.ConnectionDetails {
 	cd := managed.ConnectionDetails{
 		"Bucket": []byte(cr.Spec.ForProvider.Bucket.Name),
 	}

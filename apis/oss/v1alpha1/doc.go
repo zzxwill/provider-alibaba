@@ -16,7 +16,7 @@
 
 */
 
-// Package v1alpha1 contains managed resources for alibaba OSS services
+// Package v1alpha1 contains managed resources for alibaba Bucket services
 // +kubebuilder:object:generate=true
 // +groupName=oss.alibaba.crossplane.io
 // +versionName=v1alpha1

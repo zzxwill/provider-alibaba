@@ -31,17 +31,17 @@ import (
 // ClientInterface will help fakeOSSClient in unit tests
 type ClientInterface interface {
 	Describe(name string) (*sdk.GetBucketInfoResult, error)
-	Create(bucket v1alpha1.Bucket) error
+	Create(bucket v1alpha1.BucketParameter) error
 	Update(name string, aclStr string) error
 	Delete(name string) error
 }
 
-// SDKClient is the SDK client for OSS
+// SDKClient is the SDK client for Bucket
 type SDKClient struct {
 	Client *sdk.Client
 }
 
-// NewClient will create OSS client
+// NewClient will create Bucket client
 func NewClient(ctx context.Context, endpoint string, accessKeyID string, accessKeySecret string, stsToken string) (*SDKClient, error) {
 	var (
 		client *sdk.Client
@@ -53,13 +53,13 @@ func NewClient(ctx context.Context, endpoint string, accessKeyID string, accessK
 		client, err = sdk.New(endpoint, accessKeyID, accessKeySecret, sdk.SecurityToken(stsToken))
 	}
 	if err != nil {
-		return nil, fmt.Errorf("failed to crate OSS client: %v", err)
+		return nil, fmt.Errorf("failed to crate Bucket client: %v", err)
 	}
-	klog.Info("successfully created OSS client.")
+	klog.Info("successfully created Bucket client.")
 	return &SDKClient{Client: client}, nil
 }
 
-// Describe describes OSS bucket
+// Describe describes Bucket bucket
 func (c *SDKClient) Describe(name string) (*sdk.GetBucketInfoResult, error) {
 	bucketInfoResult, err := c.Client.GetBucketInfo(name)
 	if err != nil {
@@ -69,8 +69,8 @@ func (c *SDKClient) Describe(name string) (*sdk.GetBucketInfoResult, error) {
 	return &bucketInfoResult, nil
 }
 
-// Create creates OSS bucket
-func (c *SDKClient) Create(bucket v1alpha1.Bucket) error {
+// Create creates Bucket bucket
+func (c *SDKClient) Create(bucket v1alpha1.BucketParameter) error {
 	var options []sdk.Option
 	var (
 		acl                sdk.ACLType
@@ -103,7 +103,7 @@ func (c *SDKClient) Create(bucket v1alpha1.Bucket) error {
 	options = append(options, sdk.RedundancyType(dataRedundancyType))
 
 	if err := c.Client.CreateBucket(bucket.Name, options...); err != nil {
-		klog.ErrorS(err, "failed to create OSS bucket", "Bucket", bucket.Name)
+		klog.ErrorS(err, "failed to create Bucket bucket", "Bucket", bucket.Name)
 		return err
 	}
 	return nil
@@ -121,7 +121,7 @@ func (c *SDKClient) Update(name string, aclStr string) error {
 
 // Delete deletes SLS project
 func (c *SDKClient) Delete(name string) error {
-	klog.InfoS("deleting OSS bucket", "Name", name)
+	klog.InfoS("deleting Bucket bucket", "Name", name)
 	return c.Client.DeleteBucket(name)
 }
 
@@ -146,7 +146,7 @@ func GenerateObservation(r sdk.GetBucketInfoResult) v1alpha1.OSSObservation {
 	}
 }
 
-// ValidateOSSAcl validates OSS ACL and convert it to sdk.ACLType if possible
+// ValidateOSSAcl validates Bucket ACL and convert it to sdk.ACLType if possible
 func ValidateOSSAcl(aclStr string) (sdk.ACLType, error) {
 	var acl sdk.ACLType
 	switch aclStr {
@@ -196,7 +196,7 @@ func validateOSSDataRedundancyType(dataRedundancyTypeStr string) (sdk.DataRedund
 }
 
 // IsUpdateToDate checks whether cr is up to date
-func IsUpdateToDate(cr *v1alpha1.OSS, bucket *sdk.GetBucketInfoResult) bool {
+func IsUpdateToDate(cr *v1alpha1.Bucket, bucket *sdk.GetBucketInfoResult) bool {
 	bucketSpec := cr.Spec.ForProvider.Bucket
 	if (bucketSpec.ACL == bucket.BucketInfo.ACL) || (bucketSpec.ACL == "" && bucket.BucketInfo.ACL == "private") {
 		return true

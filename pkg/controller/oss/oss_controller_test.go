@@ -37,7 +37,7 @@ import (
 type fakeSDKClient struct {
 }
 
-// Describe describes OSS bucket
+// Describe describes Bucket bucket
 func (c *fakeSDKClient) Describe(name string) (*sdk.GetBucketInfoResult, error) {
 	switch name {
 	case "":
@@ -57,8 +57,8 @@ func (c *fakeSDKClient) Describe(name string) (*sdk.GetBucketInfoResult, error) 
 	}
 }
 
-// Create creates OSS bucket
-func (c *fakeSDKClient) Create(bucket ossv1alpha1.Bucket) error {
+// Create creates Bucket bucket
+func (c *fakeSDKClient) Create(bucket ossv1alpha1.BucketParameter) error {
 	return nil
 }
 
@@ -82,7 +82,7 @@ func TestObserve(t *testing.T) {
 		ctx = context.Background()
 	)
 
-	validCR := &ossv1alpha1.OSS{Spec: ossv1alpha1.OSSSpec{ForProvider: ossv1alpha1.OSSParameters{Bucket: ossv1alpha1.Bucket{Name: "def"}}}}
+	validCR := &ossv1alpha1.Bucket{Spec: ossv1alpha1.BucketSpec{ForProvider: ossv1alpha1.OSSParameters{Bucket: ossv1alpha1.BucketParameter{Name: "def"}}}}
 
 	type want struct {
 		o   managed.ExternalObservation
@@ -95,7 +95,7 @@ func TestObserve(t *testing.T) {
 		want   want
 	}{
 		"NotAnOSS": {
-			reason: "We should return an error if the supplied managed resource is not an OSS bucket",
+			reason: "We should return an error if the supplied managed resource is not an Bucket bucket",
 			mg:     nil,
 			want: want{
 				o:   managed.ExternalObservation{},
@@ -104,7 +104,7 @@ func TestObserve(t *testing.T) {
 		},
 		"OSSNotFound": {
 			reason: "We should report a NotFound error",
-			mg:     &ossv1alpha1.OSS{},
+			mg:     &ossv1alpha1.Bucket{},
 			want: want{
 				o: managed.ExternalObservation{
 					ResourceExists: false,
@@ -114,15 +114,15 @@ func TestObserve(t *testing.T) {
 		},
 		"OSSOtherError": {
 			reason: "We should report an unknown error",
-			mg: &ossv1alpha1.OSS{
-				Spec: ossv1alpha1.OSSSpec{ForProvider: ossv1alpha1.OSSParameters{Bucket: ossv1alpha1.Bucket{Name: "abc"}}}},
+			mg: &ossv1alpha1.Bucket{
+				Spec: ossv1alpha1.BucketSpec{ForProvider: ossv1alpha1.OSSParameters{Bucket: ossv1alpha1.BucketParameter{Name: "abc"}}}},
 			want: want{
 				o:   managed.ExternalObservation{},
 				err: errors.New("unknown error"),
 			},
 		},
 		"Success": {
-			reason: "Observing an OSS bucket successfully should return an ExternalObservation and nil error",
+			reason: "Observing an Bucket bucket successfully should return an ExternalObservation and nil error",
 			mg:     validCR,
 			want: want{
 				o: managed.ExternalObservation{
@@ -153,7 +153,7 @@ func TestCreate(t *testing.T) {
 		ctx = context.Background()
 	)
 
-	validCR := &ossv1alpha1.OSS{Spec: ossv1alpha1.OSSSpec{ForProvider: ossv1alpha1.OSSParameters{Bucket: ossv1alpha1.Bucket{Name: "def"}}}}
+	validCR := &ossv1alpha1.Bucket{Spec: ossv1alpha1.BucketSpec{ForProvider: ossv1alpha1.OSSParameters{Bucket: ossv1alpha1.BucketParameter{Name: "def"}}}}
 
 	type want struct {
 		o   managed.ExternalCreation
@@ -166,7 +166,7 @@ func TestCreate(t *testing.T) {
 		want   want
 	}{
 		"NotAnOSS": {
-			reason: "Not an OSS object",
+			reason: "Not an Bucket object",
 			mg:     nil,
 			want: want{
 				o:   managed.ExternalCreation{},
@@ -174,7 +174,7 @@ func TestCreate(t *testing.T) {
 			},
 		},
 		"Success": {
-			reason: "Creating an OSS bucket successfully",
+			reason: "Creating an Bucket bucket successfully",
 			mg:     validCR,
 			want: want{
 				o: managed.ExternalCreation{
@@ -203,7 +203,7 @@ func TestUpdate(t *testing.T) {
 		ctx = context.Background()
 	)
 
-	validCR := &ossv1alpha1.OSS{Spec: ossv1alpha1.OSSSpec{ForProvider: ossv1alpha1.OSSParameters{Bucket: ossv1alpha1.Bucket{Name: "def"}}}}
+	validCR := &ossv1alpha1.Bucket{Spec: ossv1alpha1.BucketSpec{ForProvider: ossv1alpha1.OSSParameters{Bucket: ossv1alpha1.BucketParameter{Name: "def"}}}}
 
 	type want struct {
 		o   managed.ExternalUpdate
@@ -216,7 +216,7 @@ func TestUpdate(t *testing.T) {
 		want   want
 	}{
 		"NotAnOSS": {
-			reason: "Not an OSS object",
+			reason: "Not an Bucket object",
 			mg:     nil,
 			want: want{
 				o:   managed.ExternalUpdate{},
@@ -224,7 +224,7 @@ func TestUpdate(t *testing.T) {
 			},
 		},
 		"Success": {
-			reason: "Creating an OSS bucket successfully",
+			reason: "Creating an Bucket bucket successfully",
 			mg:     validCR,
 			want: want{
 				o:   managed.ExternalUpdate{},
@@ -252,7 +252,7 @@ func TestDelete(t *testing.T) {
 		ctx = context.Background()
 	)
 
-	validCR := &ossv1alpha1.OSS{Spec: ossv1alpha1.OSSSpec{ForProvider: ossv1alpha1.OSSParameters{Bucket: ossv1alpha1.Bucket{Name: "def"}}}}
+	validCR := &ossv1alpha1.Bucket{Spec: ossv1alpha1.BucketSpec{ForProvider: ossv1alpha1.OSSParameters{Bucket: ossv1alpha1.BucketParameter{Name: "def"}}}}
 
 	type want struct {
 		err error
@@ -264,14 +264,14 @@ func TestDelete(t *testing.T) {
 		want   want
 	}{
 		"NotAnOSS": {
-			reason: "Not an OSS object",
+			reason: "Not an Bucket object",
 			mg:     nil,
 			want: want{
 				err: errors.New(errNotOSS),
 			},
 		},
 		"Success": {
-			reason: "Creating an OSS bucket successfully",
+			reason: "Creating an Bucket bucket successfully",
 			mg:     validCR,
 			want: want{
 				err: nil,
