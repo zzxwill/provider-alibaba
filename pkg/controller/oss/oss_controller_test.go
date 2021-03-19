@@ -81,8 +81,13 @@ func TestObserve(t *testing.T) {
 	var (
 		ctx = context.Background()
 	)
+	spec := ossv1alpha1.BucketSpec{}
+	spec.ForProvider.Name = "def"
+	validCR := &ossv1alpha1.Bucket{Spec: spec}
 
-	validCR := &ossv1alpha1.Bucket{Spec: ossv1alpha1.BucketSpec{ForProvider: ossv1alpha1.BucketParameters{Bucket: ossv1alpha1.BucketParameter{Name: "def"}}}}
+	spec2 := ossv1alpha1.BucketSpec{}
+	spec2.ForProvider.Name = "abc"
+	inValidCR := &ossv1alpha1.Bucket{Spec: spec2}
 
 	type want struct {
 		o   managed.ExternalObservation
@@ -114,8 +119,7 @@ func TestObserve(t *testing.T) {
 		},
 		"OSSOtherError": {
 			reason: "We should report an unknown error",
-			mg: &ossv1alpha1.Bucket{
-				Spec: ossv1alpha1.BucketSpec{ForProvider: ossv1alpha1.BucketParameters{Bucket: ossv1alpha1.BucketParameter{Name: "abc"}}}},
+			mg:     inValidCR,
 			want: want{
 				o:   managed.ExternalObservation{},
 				err: errors.New("unknown error"),
@@ -153,7 +157,9 @@ func TestCreate(t *testing.T) {
 		ctx = context.Background()
 	)
 
-	validCR := &ossv1alpha1.Bucket{Spec: ossv1alpha1.BucketSpec{ForProvider: ossv1alpha1.BucketParameters{Bucket: ossv1alpha1.BucketParameter{Name: "def"}}}}
+	spec := ossv1alpha1.BucketSpec{}
+	spec.ForProvider.Name = "def"
+	validCR := &ossv1alpha1.Bucket{Spec: spec}
 
 	type want struct {
 		o   managed.ExternalCreation
@@ -203,7 +209,9 @@ func TestUpdate(t *testing.T) {
 		ctx = context.Background()
 	)
 
-	validCR := &ossv1alpha1.Bucket{Spec: ossv1alpha1.BucketSpec{ForProvider: ossv1alpha1.BucketParameters{Bucket: ossv1alpha1.BucketParameter{Name: "def"}}}}
+	spec := ossv1alpha1.BucketSpec{}
+	spec.ForProvider.Name = "def"
+	validCR := &ossv1alpha1.Bucket{Spec: spec}
 
 	type want struct {
 		o   managed.ExternalUpdate
@@ -252,7 +260,9 @@ func TestDelete(t *testing.T) {
 		ctx = context.Background()
 	)
 
-	validCR := &ossv1alpha1.Bucket{Spec: ossv1alpha1.BucketSpec{ForProvider: ossv1alpha1.BucketParameters{Bucket: ossv1alpha1.BucketParameter{Name: "def"}}}}
+	spec := ossv1alpha1.BucketSpec{}
+	spec.ForProvider.Name = "def"
+	validCR := &ossv1alpha1.Bucket{Spec: spec}
 
 	type want struct {
 		err error

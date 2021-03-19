@@ -197,8 +197,8 @@ func validateOSSDataRedundancyType(dataRedundancyTypeStr string) (sdk.DataRedund
 
 // IsUpdateToDate checks whether cr is up to date
 func IsUpdateToDate(cr *v1alpha1.Bucket, bucket *sdk.GetBucketInfoResult) bool {
-	bucketSpec := cr.Spec.ForProvider.Bucket
-	if (bucketSpec.ACL == bucket.BucketInfo.ACL) || (bucketSpec.ACL == "" && bucket.BucketInfo.ACL == "private") {
+	forProvider := cr.Spec.ForProvider
+	if (forProvider.ACL == bucket.BucketInfo.ACL) || (forProvider.ACL == "" && bucket.BucketInfo.ACL == "private") {
 		return true
 	}
 	return false
