@@ -42,8 +42,16 @@ type SDKClient struct {
 }
 
 // NewClient will create OSS client
-func NewClient(ctx context.Context, endpoint string, accessKeyID string, accessKeySecret string) (*SDKClient, error) {
-	client, err := sdk.New(endpoint, accessKeyID, accessKeySecret)
+func NewClient(ctx context.Context, endpoint string, accessKeyID string, accessKeySecret string, stsToken string) (*SDKClient, error) {
+	var (
+		client *sdk.Client
+		err    error
+	)
+	if stsToken == "" {
+		client, err = sdk.New(endpoint, accessKeyID, accessKeySecret)
+	} else {
+		client, err = sdk.New(endpoint, accessKeyID, accessKeySecret, sdk.SecurityToken(stsToken))
+	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to crate OSS client: %v", err)
 	}

@@ -62,7 +62,7 @@ func SetupOSS(mgr ctrl.Manager, l logging.Logger) error {
 type Connector struct {
 	Client      client.Client
 	Usage       resource.Tracker
-	NewClientFn func(ctx context.Context, endpoint, accessKeyID, accessKeySecret string) (*ossclient.SDKClient, error)
+	NewClientFn func(ctx context.Context, endpoint, accessKeyID, accessKeySecret, stsToken string) (*ossclient.SDKClient, error)
 }
 
 // Connect initials cloud resource client
@@ -111,7 +111,7 @@ func (c *Connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 		return nil, err
 	}
 
-	ossClient, err := c.NewClientFn(ctx, endpoint, string(s.Data["accessKeyId"]), string(s.Data["accessKeySecret"]))
+	ossClient, err := c.NewClientFn(ctx, endpoint, string(s.Data["accessKeyId"]), string(s.Data["accessKeySecret"]), "")
 	return &external{client: ossClient}, errors.Wrap(err, errCreateBucket)
 }
 
